@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="30">
+	<Appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout
+				pattern="%d{yyyy-MM-dd HH:mm:ss.SSS}[%level][%t][%logger][%M]- %msg%n" />
+		</Console>
+	</Appenders>
+	<Loggers>
+		<Logger name="org.apache.ibatis.io.ResolverUtil" level="error">
+			<AppenderRef ref="Console" />
+		</Logger>
+
+		<!-- 输出当前调用哪个dubbo服务节点 -->
+		<Logger name="com.alibaba.dubbo.remoting.transport.DecodeHandler"
+			level="debug" additivity="false">
+			<AppenderRef ref="Console">
+				<RegexFilter regex=".*DecodeableRpcResult.*" onMatch="ACCEPT"
+					onMismatch="DENY" />
+			</AppenderRef>
+		</Logger>
+
+		<!-- mybatis log (start) -->
+		<Logger name="com.eelly.store.level.dao" level="debug"
+			additivity="false">
+			<AppenderRef ref="Console" />
+		</Logger>
+		<Logger name="com.eelly.store.market.dao" level="debug"
+			additivity="false">
+			<AppenderRef ref="Console" />
+		</Logger>
+		<Logger name="com.eelly.store.store.dao" level="debug"
+			additivity="false">
+			<AppenderRef ref="Console" />
+		</Logger>
+		<Logger name="com.eelly.store.storeagent.dao" level="debug"
+			additivity="false">
+			<AppenderRef ref="Console" />
+		</Logger>
+		<Logger name="com.eelly.store.storecount.dao" level="debug"
+			additivity="false">
+			<AppenderRef ref="Console" />
+		</Logger>
+		<Logger name="com.eelly.store.storecoupon.dao" level="debug"
+			additivity="false">
+			<AppenderRef ref="Console" />
+		</Logger>
+		<Logger name="com.eelly.store.storeextend.dao" level="debug"
+			additivity="false">
+			<AppenderRef ref="Console" />
+		</Logger>
+		<Logger name="com.eelly.store.storegoodscategory.dao" level="debug"
+			additivity="false">
+			<AppenderRef ref="Console" />
+		</Logger>
+		<Logger name="com.eelly.store.storegrade.dao" level="debug"
+			additivity="false">
+			<AppenderRef ref="Console" />
+		</Logger>
+		<Logger name="com.eelly.store.storelink.dao" level="debug"
+			additivity="false">
+			<AppenderRef ref="Console" />
+		</Logger>
+		<Logger name="com.eelly.store.storelogisticstpl.dao" level="debug"
+			additivity="false">
+			<AppenderRef ref="Console" />
+		</Logger>
+		<Logger name="com.eelly.store.storepunish.dao" level="debug"
+			additivity="false">
+			<AppenderRef ref="Console" />
+		</Logger>
+		<Logger name="com.eelly.store.storeqqservice.dao" level="debug"
+			additivity="false">
+			<AppenderRef ref="Console" />
+		</Logger>
+		<Logger name="com.eelly.store.storeseo.dao" level="debug"
+			additivity="false">
+			<AppenderRef ref="Console" />
+		</Logger>
+		<Logger name="com.eelly.store.storestatuschg.dao" level="debug"
+			additivity="false">
+			<AppenderRef ref="Console" />
+		</Logger>
+		<Logger name="com.eelly.store.storesupervise.dao" level="debug"
+			additivity="false">
+			<AppenderRef ref="Console" />
+		</Logger>
+		<Logger name="com.eelly.store.user.dao" level="debug"
+			additivity="false">
+			<AppenderRef ref="Console" />
+		</Logger>
+		<!-- mybatis log (end) -->
+
+		<Logger name="com.eelly" level="info" additivity="false">
+			<AppenderRef ref="Console" />
+		</Logger>
+		<Root level="info">
+			<AppenderRef ref="Console" />
+		</Root>
+	</Loggers>
+</Configuration>

@@ -1,0 +1,118 @@
+/** 
+* @组件名：eelly_springmvc_component
+* @包名：com.eelly.mvc.common
+* @文件名：PermissionInterceptor.java
+* @创建时间： 2014年10月23日 上午10:05:50
+* @版权信息：Copyright © 2014 eelly Co.Ltd,衣联网版权所有。
+*/
+
+package com.huangzl.permit;
+
+import java.lang.reflect.Method;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.eelly.core.util.ReflectionUtil;
+
+/**
+ * @类名：PermissionInterceptor
+ * @描述: 
+ * @创建人：<a href=mailto: huangzhenliang@eelly.net>huangzhenliang</a>
+ * @修改人：
+ * @修改时间：2014年10月23日 上午10:05:50
+ * @修改说明：<br/>
+ * @版本信息：V1.0.0<br/>
+ */
+@Aspect
+@Component
+public class PermissionInterceptor {
+
+    
+    //Controller方法
+//    @Pointcut("execution(* org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter.handle(..))")
+//    @Pointcut("execution(* com.eelly.mvc.controller.GoodsController.*(..))")
+//    @Pointcut("execution(* com.eelly..*.*(..))")
+    @Pointcut("execution(* com.eelly..*Controller.*(..))")
+    public void controllerMethod() {
+
+    }
+    
+    @Around("controllerMethod()")
+    public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
+        Method method = ReflectionUtil.getMethod(joinPoint);
+        String methodName = method.getName();
+        Class<? extends Object> clazz = joinPoint.getTarget().getClass();
+        String clazzName = clazz.getSimpleName();
+        
+        String permission = clazzName + "." + methodName;
+        
+        
+        
+        /*Object target = joinPoint.getTarget();
+        HttpServletRequest retValue;
+        try {
+            Method[] list = target.getClass().getMethods();
+            for(Method reqMethod : list){
+                System.out.println(reqMethod.getName());
+            }
+            
+            HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder
+                    .getRequestAttributes()).getRequest();
+            
+            System.out.println(request);
+            System.out.println(request.getParameter("t"));//ok
+            
+
+        } catch (Exception e) {
+            return null;
+        }*/
+        
+        //获取所有权限
+        Subject subject = SecurityUtils.getSubject();
+        boolean isPermitted = subject.isPermitted(permission);
+        
+        String needPermitList = "GoodsController.goodsList";
+        
+        boolean needPermit = needPermitList.indexOf(permission) > 0;
+        
+        if(needPermit){
+            if(isPermitted){
+                // 连接点继续处理
+                Object retObj = joinPoint.proceed();
+                return retObj;
+            }else{
+                Class<?> rt = method.getReturnType();
+                if(rt.equals(ModelAndView.class)){
+                    return new ModelAndView("redirect:/403.do");
+                }else if(rt.equals(String.class)){
+                    return "redirect:/403.do";
+                }else{
+                    System.out.println(rt);
+                    return null;
+                }
+                
+            }
+        }else{
+            Object retObj = joinPoint.proceed();
+            return retObj;
+        }
+        
+        
+        
+        // 设置参数信息
+//        Object[] params = joinPoint.getArgs();
+
+    }
+}
+

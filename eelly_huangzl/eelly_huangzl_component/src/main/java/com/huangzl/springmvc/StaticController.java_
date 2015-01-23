@@ -1,0 +1,74 @@
+/** 
+* @组件名：eelly_huangzl_component
+* @包名：com.huangzl.springmvc
+* @文件名：StaticController.java
+* @创建时间： 2014年10月16日 下午4:29:48
+* @版权信息：Copyright © 2014 eelly Co.Ltd,衣联网版权所有。
+*/
+
+package com.huangzl.springmvc;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+/**
+ * @类名：StaticController
+ * @描述: 
+ * @创建人：<a href=mailto: huangzhenliang@eelly.net>huangzhenliang</a>
+ * @修改人：
+ * @修改时间：2014年10月16日 下午4:29:48
+ * @修改说明：<br/>
+ * @版本信息：V1.0.0<br/>
+ */
+@Controller
+public class StaticController {
+    
+    /**
+     * 基本流程:访问主页-->后台freeMake模板生成静态页面(页面url全部格式化为静态)-->响应展示-->点击静态url-->后台springMvc 映射,处理-->freeMake生成静态页面
+     */
+    
+    /**
+     * 实现一个例子:访问主页,浏览产品,点击查看产品详情
+     */
+    
+    
+    @Autowired
+    private  HttpServletRequest request;
+
+    //http://so.eelly.com/index.php?app=solrsearch&category=289&entp=1&keyword=%E8%A1%A3
+    //http://so.eelly.com/index.php?app=solrsearch&category=289&entp=1&page=2&keyword=%E8%A1%A3#module
+    //http://so.eelly.com/s-category-289-page4-keyword-%E8%A1%A3.html#module
+//    @RequestMapping("share/k{k:[\\w\\W]+}-p{p:\\d+}-s{s:\\d+}")
+//    @RequestMapping("/s-category-{category:\\d+}-page{page:\\d+}-keyword-{keyword:[\\w\\W]+}.html")
+    @RequestMapping(value = {"/s-category-{category:\\d+}-page{page:\\d+}-keyword-{keyword:[\\w\\W]+}.html"})
+    public String search(@PathVariable String category, @PathVariable int page, @PathVariable String keyword){
+        System.out.println(request.getRequestURI() + ",静态地址映射为:");
+        System.out.println("category:" + category + ",page:" + page + ",keyword:" + keyword);
+//        return "";
+        System.out.println("---2");
+        if(!"289".equals(category)){
+//            return new ModelAndView(new RedirectView("/jsp/login.jsp"));
+            return "login";
+        }
+        
+        return "index";
+    }//路径带中文,小数点
+    
+    @RequestMapping(value = {"/goods/{goodCode:\\d+}.html"})
+    public String goodDetail(@PathVariable String goodCode){
+        System.out.println("商品编号"+goodCode);
+        //读取数据库,读取模板,生成响应内容,转发到对应model
+        if(!"1".equals(goodCode)){//失败
+            return "error";
+        }
+        
+        return "";
+    }
+    
+    
+}
+

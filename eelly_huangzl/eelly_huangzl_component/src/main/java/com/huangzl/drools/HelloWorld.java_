@@ -1,0 +1,402 @@
+/** 
+* @组件名：drools6
+* @包名：com.huangzl.drools6
+* @文件名：HelloWorld.java
+* @创建时间： 2014年10月27日 下午2:27:41
+* @版权信息：Copyright © 2014 eelly Co.Ltd,衣联网版权所有。
+*/
+
+package com.huangzl.drools;
+
+import java.util.ArrayList;
+
+import org.kie.api.KieServices;
+import org.kie.api.builder.KieBuilder;
+import org.kie.api.builder.KieFileSystem;
+import org.kie.api.builder.KieScanner;
+import org.kie.api.builder.Message.Level;
+import org.kie.api.builder.ReleaseId;
+import org.kie.api.builder.model.KieBaseModel;
+import org.kie.api.builder.model.KieModuleModel;
+import org.kie.api.event.rule.DebugAgendaEventListener;
+import org.kie.api.event.rule.DebugRuleRuntimeEventListener;
+import org.kie.api.io.KieResources;
+import org.kie.api.runtime.KieContainer;
+import org.kie.api.runtime.KieSession;
+
+
+/**
+ * @类名：HelloWorld
+ * @描述: 
+ * @创建人：<a href=mailto: huangzhenliang@eelly.net>huangzhenliang</a>
+ * @修改人：
+ * @修改时间：2014年10月27日 下午2:27:41
+ * @修改说明：<br/>
+ * @版本信息：V1.0.0<br/>
+ */
+public class HelloWorld {
+    
+    
+
+    /**
+     * @方法名：main
+     * @描述：TODO 
+     * @创建人：<a href=mailto: huangzhenliang@eelly.net>huangzhenliang</a>
+     * @修改人：
+     * @修改时间：2014年10月27日 下午2:27:41
+     * @param args 
+     * @返回值：void 
+     * @异常说明：
+     */
+    public static void main(String[] args) throws Exception {
+//        test1();
+//        test();
+//        test3();
+        test4();
+    }
+    
+    private static KieContainer kc;
+    
+    public static KieContainer getKc() {
+        if(kc == null){
+            KieServices kieServices = KieServices.Factory.get();
+            KieResources resources = kieServices.getResources();
+            KieModuleModel kieModuleModel = kieServices.newKieModuleModel();// 1
+
+            KieBaseModel baseModel = kieModuleModel.newKieBaseModel("FileSystemKBase").addPackage(
+                    "rules");// 2
+            baseModel.newKieSessionModel("FileSystemKSession");// 3
+            KieFileSystem fileSystem = kieServices.newKieFileSystem();
+
+            String xml = kieModuleModel.toXML();
+            System.out.println(xml);// 4
+            fileSystem.writeKModuleXML(xml);// 5
+
+//            fileSystem.write("c:/rules/rule.drl",
+//                    resources.newClassPathResource("drools/hello/HelloWorld.drl"));// 6
+//            fileSystem.write("src/main/resources/rules/rule.drl",
+//                    resources.newClassPathResource("kiefilesystem/KieFileSystemTest.drl"));// 6
+            fileSystem.write("src/main/resources/rules/HelloWorld.drl",
+                    resources.newClassPathResource("drools/hello/HelloWorld.drl"));// 6
+
+            KieBuilder kb = kieServices.newKieBuilder(fileSystem);
+            kb.buildAll();// 7
+            if (kb.getResults().hasMessages(Level.ERROR)) {
+                throw new RuntimeException("Build Errors:\n" + kb.getResults().toString());
+            }
+            kc = kieServices.newKieContainer(kieServices.getRepository()
+                    .getDefaultReleaseId());
+            
+
+            /*
+             * 1先创建KieModuleModel； 2再创建KieBaseModel； 3然后创建KieSessionModel；
+             * 4创建完成之后可以生产一个xml文件，就是kmodule.xml文件了； 5将这个xml文件写入到KieFileSystem中； 6然后将规则文件等写入到KieFileSystem中；
+             * 7最后通过KieBuilder进行构建就将该kmodule加入到KieRepository中了，这样就将自定义的kmodule加入到引擎中了，就可以按照之前的方法进行使用了。
+             */
+        }
+        return kc;
+    }
+    
+    public static void reloadKc() {
+        kc = null;
+    }
+
+
+    public static void test4() throws Exception{
+        
+
+        // assertNotNull(kContainer.getKieBase("FileSystemKBase"));
+        KieSession kSession = getKc().newKieSession("FileSystemKSession");
+        
+        kSession.setGlobal( "list",
+                new ArrayList<Object>() );
+
+        // The application can also setup listeners
+//        kSession.addEventListener( new DebugAgendaEventListener() );
+//        kSession.addEventListener( new DebugRuleRuntimeEventListener() );
+        
+        final Message message = new Message();
+        message.setName("huangzl");
+        
+        kSession.insert( message );
+        
+        
+        kSession.fireAllRules();
+        
+        
+        Thread.sleep(1000*1);
+        System.out.println("=====================================================");
+        
+        kSession = getKc().newKieSession("FileSystemKSession");
+        
+        kSession.setGlobal( "list",
+                new ArrayList<Object>() );
+        
+        final Message zhangsan = new Message();
+        zhangsan.setName("zhangsan");
+        kSession.insert( zhangsan );
+        
+        kSession.fireAllRules();
+        
+        
+        Thread.sleep(1000*10);
+        System.out.println("=====================================================");
+        
+        reloadKc();
+        
+        kSession = getKc().newKieSession("FileSystemKSession");
+        
+        kSession.setGlobal( "list",
+                new ArrayList<Object>() );
+        
+        final Message zhangsan2 = new Message();
+        zhangsan2.setName("zhangsan");
+        kSession.insert( zhangsan2 );
+        
+        kSession.fireAllRules();
+        
+        
+        Thread.sleep(1000*10);
+
+    }
+    
+    
+    /**
+     * 
+     * KieScanner作用是扫描maven项目版本变动
+     */
+    public static void test3(){
+        KieServices ks = KieServices.Factory.get();
+        
+        // From the kie services, a container is created from the classpath
+//        KieContainer kc = ks.getKieClasspathContainer();
+        
+        ReleaseId releaseId = ks.newReleaseId( "org.acme", "myartifact", "1.0-SNAPSHOT" );
+        KieContainer kc = ks.newKieContainer( releaseId );
+        
+        KieScanner kScanner = ks.newKieScanner( kc );
+
+
+        // Start the KieScanner polling the Maven repository every 10 seconds
+
+//        kScanner.start( 10000L );
+        kScanner.scanNow();
+        
+        // From the container, a session is created based on  
+        // its definition and configuration in the META-INF/kmodule.xml file 
+        KieSession ksession = kc.newKieSession("HelloWorldKS");
+        
+        // Once the session is created, the application can interact with it
+        // In this case it is setting a global as defined in the 
+        // org/drools/examples/helloworld/HelloWorld.drl file
+        ksession.setGlobal( "list",
+                            new ArrayList<Object>() );
+
+        // The application can also setup listeners
+        ksession.addEventListener( new DebugAgendaEventListener() );
+        ksession.addEventListener( new DebugRuleRuntimeEventListener() );
+
+        // To setup a file based audit logger, uncomment the next line 
+        // KieRuntimeLogger logger = ks.getLoggers().newFileLogger( ksession, "./helloworld" );
+        
+        // To setup a ThreadedFileLogger, so that the audit view reflects events whilst debugging,
+        // uncomment the next line
+        // KieRuntimeLogger logger = ks.getLoggers().newThreadedFileLogger( ksession, "./helloworld", 1000 );
+
+        // The application can insert facts into the session
+        final Message message = new Message();
+        message.setName("huangzl");
+        
+        
+        ksession.insert( message );
+
+        // and fire the rules
+        ksession.fireAllRules();
+    }
+    
+    public static void test1(){
+     // KieServices is the factory for all KIE services 
+        KieServices ks = KieServices.Factory.get();
+        
+        // From the kie services, a container is created from the classpath
+        KieContainer kc = ks.getKieClasspathContainer();
+        
+        // From the container, a session is created based on  
+        // its definition and configuration in the META-INF/kmodule.xml file 
+        KieSession ksession = kc.newKieSession("HelloWorldKS");
+        
+        // Once the session is created, the application can interact with it
+        // In this case it is setting a global as defined in the 
+        // org/drools/examples/helloworld/HelloWorld.drl file
+        ksession.setGlobal( "list",
+                            new ArrayList<Object>() );
+
+        // The application can also setup listeners
+        ksession.addEventListener( new DebugAgendaEventListener() );
+        ksession.addEventListener( new DebugRuleRuntimeEventListener() );
+
+        // To setup a file based audit logger, uncomment the next line 
+        // KieRuntimeLogger logger = ks.getLoggers().newFileLogger( ksession, "./helloworld" );
+        
+        // To setup a ThreadedFileLogger, so that the audit view reflects events whilst debugging,
+        // uncomment the next line
+        // KieRuntimeLogger logger = ks.getLoggers().newThreadedFileLogger( ksession, "./helloworld", 1000 );
+
+        // The application can insert facts into the session
+        final Message message = new Message();
+        message.setName("huangzl");
+        
+        final Message message2 = new Message();
+        message2.setName("zhang3");
+        
+        ksession.insert( message );
+        ksession.insert( message2 );
+
+        // and fire the rules
+        ksession.fireAllRules();
+        
+        
+        // Remove comment if using logging
+        // logger.close();
+
+        // and then dispose the session
+        ksession.dispose();
+    }
+    
+    public static void test(){
+        KieServices ks = KieServices.Factory.get();
+        
+        // From the kie services, a container is created from the classpath
+        KieContainer kc = ks.getKieClasspathContainer();
+        
+        // From the container, a session is created based on  
+        // its definition and configuration in the META-INF/kmodule.xml file 
+        KieSession ksession = kc.newKieSession("HelloWorldKS");
+        
+        // Once the session is created, the application can interact with it
+        // In this case it is setting a global as defined in the 
+        // org/drools/examples/helloworld/HelloWorld.drl file
+        ksession.setGlobal( "list",
+                            new ArrayList<Object>() );
+
+        // The application can also setup listeners
+//        ksession.addEventListener( new DebugAgendaEventListener() );
+//        ksession.addEventListener( new DebugRuleRuntimeEventListener() );
+
+        // To setup a file based audit logger, uncomment the next line 
+        // KieRuntimeLogger logger = ks.getLoggers().newFileLogger( ksession, "./helloworld" );
+        
+        // To setup a ThreadedFileLogger, so that the audit view reflects events whilst debugging,
+        // uncomment the next line
+        // KieRuntimeLogger logger = ks.getLoggers().newThreadedFileLogger( ksession, "./helloworld", 1000 );
+
+        // The application can insert facts into the session
+        A a = new A();
+        a.setName("a");
+        
+        B b = new B();
+        b.setName("b");
+        
+        A a1 = new A();
+        a1.setName("a1");
+        
+        B b1 = new B();
+        b1.setName("b1");
+        
+        ksession.insert( a );
+        ksession.insert( b );
+        
+        
+        //测试"规则"如何匹配工作内存中的对象:对规则A,规则中使用到的对象类型,从工作内存取出一个组合C,与规则进行匹配
+        ksession.insert( a1 );
+        ksession.insert( b1 );
+
+        // and fire the rules
+        ksession.fireAllRules();
+        /**
+         * 运行结果:C21+C21+C21*C21+C21*C21=12
+         rule a ,name is :a1
+            rule a ,name is :a
+            rule b ,name is :b1
+            rule b ,name is :b
+            rule ab ,name is :a+b
+            rule ab ,name is :a+b1
+            rule ab ,name is :a1+b
+            rule ab ,name is :a1+b1
+            rule aa ,name is :a+a
+            rule aa ,name is :a+a1
+            rule aa ,name is :a1+a
+            rule aa ,name is :a1+a1
+            rule aora ,name is :a1,com.eelly.mvc.drools.Hello2$A@6920aca
+            rule aora ,name is :a,com.eelly.mvc.drools.Hello2$A@3fa8a0fa
+            rule aora ,name is :a1,com.eelly.mvc.drools.Hello2$A@6920aca
+            rule aora ,name is :a,com.eelly.mvc.drools.Hello2$A@3fa8a0fa
+            rule null when 
+         */
+        // Remove comment if using logging
+        // logger.close();
+
+        // and then dispose the session
+        ksession.dispose();
+    }
+    
+    public static class Message{
+        private String name;
+        private String result;
+        
+        /**
+         * @return the name
+         */
+        public String getName() {
+            return name;
+        }
+        
+        /**    
+         * @param name 要设置的 name    
+         */
+        public void setName(String name) {
+            this.name = name;
+        }
+        
+        /**
+         * @return the result
+         */
+        public String getResult() {
+            return result;
+        }
+        
+        /**    
+         * @param result 要设置的 result    
+         */
+        public void setResult(String result) {
+            this.result = result;
+        }
+        
+        
+    }
+    
+    public static class A{
+        private String name;
+
+        public String getName() {
+            return name;
+        }
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
+    public static class B{
+        private String name;
+        
+        public String getName() {
+            return name;
+        }
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
+
+}
+
+
+

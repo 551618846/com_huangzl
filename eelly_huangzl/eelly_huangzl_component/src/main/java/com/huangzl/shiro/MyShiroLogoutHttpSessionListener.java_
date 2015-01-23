@@ -1,0 +1,65 @@
+/** 
+* @组件名：eelly_springmvc_component
+* @包名：com.eelly.mvc.common
+* @文件名：MyShiroSessionListener.java
+* @创建时间： 2014年11月27日 下午6:53:29
+* @版权信息：Copyright © 2014 eelly Co.Ltd,衣联网版权所有。
+*/
+
+package com.huangzl.shiro;
+
+import java.util.HashMap;
+
+import javax.servlet.http.HttpSessionEvent;
+import javax.servlet.http.HttpSessionListener;
+
+import org.springframework.context.ApplicationContext;
+
+import com.eelly.core.cache.redis.RedisCache;
+import com.eelly.core.util.SpringContextUtil;
+
+/**
+ * @类名：MyShiroSessionListener
+ * @描述: 如果使用Redis缓存session,销毁HTTPsession必须同时删除shiro-session.如果默认的shiro-session缓存,销毁HTTPsession即可销毁shiro-session.
+ * @创建人：<a href=mailto: huangzhenliang@eelly.net>huangzhenliang</a>
+ * @修改人：
+ * @修改时间：2014年11月27日 下午6:53:29
+ * @修改说明：<br/>
+ * @版本信息：V1.0.0<br/>
+ */
+public class MyShiroLogoutHttpSessionListener implements HttpSessionListener {
+
+    @Override
+    public void sessionCreated(HttpSessionEvent se) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void sessionDestroyed(HttpSessionEvent se) {
+        HashMap<String, String> map = MyCasFilter.getSessionMappingStorage();
+        String httpSessionId = se.getSession().getId();
+        String shiroSessionId = map.get(httpSessionId);
+        
+        if(shiroSessionId != null){
+            ApplicationContext context = SpringContextUtil.getApplicationContext();
+            RedisCache cache = context.getBean("shiroCache",RedisCache.class);
+            
+            String activeSessionCache = "shiro-activeSessionCache";
+            try {
+                cache.deleteHashCached(activeSessionCache.getBytes(), shiroSessionId.getBytes());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            
+            //↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑如果使用Redis缓存shiro-session
+            //↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓如果使用默认缓存shiro-session,销毁httpsession即可
+            
+            
+            
+        }
+        
+    }
+    
+
+}
+

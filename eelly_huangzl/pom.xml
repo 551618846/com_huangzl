@@ -1,0 +1,59 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.eelly.huangzl</groupId>
+	<artifactId>eelly_huangzl</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>eelly_huangzl</name>
+	<description>eelly_huangzl</description>
+
+	<properties>
+
+		<eelly_core.version>0.0.1-SNAPSHOT</eelly_core.version>
+		<eelly_huangzl_api.version>0.0.1-SNAPSHOT</eelly_huangzl_api.version>
+
+		<!-- Plugin的属性定义 -->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<jdk.version>1.7</jdk.version>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+
+			<!-- =====eelly_core begin===== -->
+			<dependency>
+				<groupId>com.eelly.core</groupId>
+				<artifactId>eelly_core</artifactId>
+				<version>${eelly_core.version}</version>
+			</dependency>
+			<!-- =====eelly_core end===== -->
+			
+			<dependency>
+				<groupId>com.eelly.huangzl</groupId>
+				<artifactId>eelly_huangzl_api</artifactId>
+				<version>${eelly_huangzl_api.version}</version>
+			</dependency>
+
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<source>${jdk.version}</source>
+					<target>${jdk.version}</target>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<modules>
+		<module>eelly_huangzl_component</module>
+	</modules>
+</project>

@@ -1,0 +1,148 @@
+/** 
+* @组件名：eelly_springmvc_component
+* @包名：com.eelly.mvc.drools
+* @文件名：ReloadDrools.java
+* @创建时间： 2014年11月4日 下午4:41:29
+* @版权信息：Copyright © 2014 eelly Co.Ltd,衣联网版权所有。
+*/
+
+package com.huangzl.drools;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.Iterator;
+import java.util.Map;
+
+import org.drools.compiler.kie.builder.impl.ClasspathKieProject;
+import org.drools.compiler.kproject.ReleaseIdImpl;
+import org.drools.compiler.kproject.models.KieBaseModelImpl;
+import org.drools.compiler.kproject.models.KieModuleModelImpl;
+import org.drools.compiler.kproject.models.KieSessionModelImpl;
+import org.kie.api.KieServices;
+import org.kie.api.builder.KieScanner;
+import org.kie.api.builder.ReleaseId;
+import org.kie.api.builder.model.KieModuleModel;
+import org.kie.api.builder.model.KieSessionModel;
+import org.kie.api.conf.DeclarativeAgendaOption;
+import org.kie.api.conf.EqualityBehaviorOption;
+import org.kie.api.conf.EventProcessingOption;
+import org.kie.api.runtime.KieContainer;
+import org.kie.api.runtime.conf.ClockTypeOption;
+import org.kie.spring.KModuleBeanFactoryPostProcessor;
+import org.kie.spring.KieSpringUtils;
+import org.kie.spring.factorybeans.KBaseFactoryBean;
+import org.kie.spring.factorybeans.KModuleFactoryBean;
+import org.kie.spring.factorybeans.KSessionFactoryBean;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.PropertyValue;
+import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanExpressionContext;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.context.ApplicationContext;
+
+import com.eelly.core.util.SpringContextUtil;
+
+/**
+ * @类名：ReloadDrools
+ * @描述: 
+ * @创建人：<a href=mailto: huangzhenliang@eelly.net>huangzhenliang</a>
+ * @修改人：
+ * @修改时间：2014年11月4日 下午4:41:29
+ * @修改说明：<br/>
+ * @版本信息：V1.0.0<br/>
+ */
+public class ReloadDrools implements BeanFactoryPostProcessor{
+    
+    private static ReloadDrools ins = new ReloadDrools();
+    private static ConfigurableListableBeanFactory beanFactory;
+    
+    public static ReloadDrools get(){
+        return ins;
+    }
+    
+//    private KModuleBeanFactoryPostProcessor p =new KModuleBeanFactoryPostProcessor();
+//    protected ReleaseId releaseId;
+    
+    
+    public void reload() throws Exception{
+        
+        String configFilePath = null;
+        String pomProperties = null;
+        ReleaseId releaseId = null;
+        try {
+            configFilePath = getClass().getResource("/").toURI().getPath();
+        } catch (URISyntaxException e) {
+            configFilePath = getClass().getResource("/").getPath();
+        }
+        
+        pomProperties = ClasspathKieProject.getPomProperties(configFilePath);
+        if (pomProperties != null) {
+            releaseId = ReleaseIdImpl.fromPropertiesString(pomProperties);
+        }
+        
+        KieServices kieServices = KieServices.Factory.get();
+        KieContainer kContainer = kieServices.getKieClasspathContainer();
+
+//        ReleaseId releaseId = kieServices.newReleaseId( "org.acme", "myartifact", "1.0-SNAPSHOT" );
+
+//        KieContainer kContainer = kieServices.newKieContainer( releaseId );//com.eelly.springmvc:eelly_springmvc_component:0.0.1-SNAPSHOT
+
+        KieScanner kScanner = kieServices.newKieScanner( kContainer );
+
+
+        // Start the KieScanner polling the Maven repository every 10 seconds
+
+//        kScanner.start( 10000L );
+        kScanner.scanNow();
+        
+        
+        /*Map<String, KModuleFactoryBean> kmfMap = SpringContextUtil.getApplicationContext().getBeansOfType(KModuleFactoryBean.class);
+        
+        Iterator<String> kmi = kmfMap.keySet().iterator();
+        while(kmi.hasNext()){
+            
+            KieModuleModel kieModuleModel = null;;
+            Class clazz = KModuleBeanFactoryPostProcessor.class;
+            for (Method method : clazz.getDeclaredMethods()) {
+                if ("postProcessBeanFactory".equals(method.getName())) {
+                    Field field=clazz.getDeclaredField("configFilePath");
+                    field.setAccessible(true);
+                    String v = (String)field.get(clazz.newInstance());
+                    
+                    String patn = Thread.currentThread().getContextClassLoader().getResource("").toString();
+                    
+                    Constructor con = clazz.getConstructor(URL.class,String.class,ApplicationContext.class);
+                    URL configFileURL = Thread.currentThread().getContextClassLoader().getResource("");
+                    String configFilePath = null;
+                    try {
+                        configFilePath = getClass().getResource("/").toURI().getPath();
+                    } catch (URISyntaxException e) {
+                        configFilePath = getClass().getResource("/").getPath();
+                    }
+                    
+                    KModuleBeanFactoryPostProcessor instance = (KModuleBeanFactoryPostProcessor)con.newInstance(configFileURL,configFilePath,null);
+                    
+                    method.setAccessible(true);
+//                    kieModuleModel = (KieModuleModel)method.invoke(clazz.newInstance(), beanFactory);
+                    kieModuleModel = (KieModuleModel)method.invoke(instance, beanFactory);
+                    break;
+                }
+            }
+        }*/
+    }
+    
+    
+    @Override
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory)
+            throws BeansException {
+        this.beanFactory = beanFactory;
+        
+    }
+}
+

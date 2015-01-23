@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context" 
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+		http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd"
+		default-lazy-init="true">
+	
+	<description>dubbo配置信息</description>
+	
+	<!-- ================= 服务消费者(Start) ================== -->
+	<dubbo:reference id="commonDubboManager" interface="com.eelly.common.dubbo.manager.ICommonDubboManager" version="0.0.1" />
+	<dubbo:reference id="logDubboManager" interface="com.eelly.log.dubbo.manager.ILogDubboManager" version="0.0.1" />
+	<dubbo:reference id="areaDubboManager" interface="com.eelly.common.dubbo.manager.IAreaDubboManager" version="0.0.1" />
+	<!-- 放在core项目 -->
+<!-- 	<dubbo:reference id="rocketMQFailHandlerDubboManager" interface="com.eelly.common.dubbo.manager.IRocketMQFailHandlerDubboManager" version="0.0.1" /> -->
+<!-- 	<dubbo:reference id="testHelloDubboManager" interface="com.eelly.huangzl.dubbo.manager.IHelloDubboManager" version="0.0.1" /> -->
+	<!-- ================= 服务消费者(End) ================== -->
+
+	<!-- ================= 服务提供者(Start) ================== -->
+	<!-- <dubbo:service interface="com.eelly.store.dubbo.manager.IMarketDubboManager" ref="marketDubboManagerImpl" version="${dubbo.provider.version}" /> -->
+	<dubbo:service interface="com.eelly.huangzl.dubbo.manager.IHelloDubboManager" ref="helloDubboManagerImpl" version="${dubbo.provider.version}" />
+	<!-- ================== 服务提供者(End) ================== -->
+
+</beans>

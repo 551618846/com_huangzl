@@ -1,0 +1,117 @@
+/** 
+* @组件名：eelly_springmvc_component
+* @包名：com.eelly.mvc.common
+* @文件名：MYCasFilter.java
+* @创建时间： 2014年11月10日 下午5:55:10
+* @版权信息：Copyright © 2014 eelly Co.Ltd,衣联网版权所有。
+*/
+
+package com.huangzl.shiro;
+
+import java.util.HashMap;
+
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authc.AuthenticationToken;
+import org.apache.shiro.cas.CasFilter;
+import org.apache.shiro.cas.CasToken;
+import org.apache.shiro.mgt.RealmSecurityManager;
+import org.apache.shiro.session.Session;
+import org.apache.shiro.subject.PrincipalCollection;
+import org.apache.shiro.subject.SimplePrincipalCollection;
+import org.apache.shiro.subject.Subject;
+import org.apache.shiro.web.servlet.ShiroHttpServletRequest;
+import org.apache.shiro.web.session.HttpServletSession;
+import org.apache.shiro.web.util.WebUtils;
+import org.jasig.cas.client.session.HashMapBackedSessionMappingStorage;
+import org.jasig.cas.client.session.SessionMappingStorage;
+
+/**
+ * @类名：MYCasFilter
+ * @描述: 
+ * @创建人：<a href=mailto: huangzhenliang@eelly.net>huangzhenliang</a>
+ * @修改人：
+ * @修改时间：2014年11月10日 下午5:55:10
+ * @修改说明：<br/>
+ * @版本信息：V1.0.0<br/>
+ */
+public class MyCasFilter extends CasFilter{
+    
+    private static HashMap<String, String> sessionMappingStorage = new HashMap<String, String>();
+    
+    public static HashMap<String, String> getSessionMappingStorage() {
+        return sessionMappingStorage;
+    }
+
+
+
+    @Override
+    protected boolean onLoginSuccess(AuthenticationToken token, Subject subject, ServletRequest request,
+                                     ServletResponse response) throws Exception {
+        
+        //这里是shiro登录成功后的,所以SecurityUtils.getSubject().getPrincipals()取到的是正确的
+        RealmSecurityManager securityManager = (RealmSecurityManager) SecurityUtils.getSecurityManager();
+        MyShiro userRealm = (MyShiro) securityManager.getRealms().iterator().next();
+        userRealm.clearCachedAuthorizationInfo();
+        
+        
+        //把shiro-session和http-session映射起来,方便注销shiro-session(如果使用Redis缓存shiro-session时需要)
+        String shiroSessionId = null;
+        Session shiroSession = subject.getSession(false);
+        if(shiroSession != null){
+            shiroSessionId = String.valueOf(shiroSession.getId());
+        }
+        
+        String httpSessionId = null;
+        ShiroHttpServletRequest t = (ShiroHttpServletRequest)request;
+        HttpServletRequest httpRequest = (HttpServletRequest)t.getRequest();
+        HttpSession httpSession = httpRequest.getSession(false);
+        if(httpSession != null){
+            httpSessionId = httpSession.getId();
+        }
+        if(httpSessionId != null && shiroSessionId != null){
+            sessionMappingStorage.put(httpSessionId, shiroSessionId);
+        }
+        //↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑如果使用Redis缓存shiro-session
+        //↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓如果使用默认缓存shiro-session,销毁httpsession即可
+        
+        
+        
+        
+        /*HttpServletRequest httpRequest = (HttpServletRequest)request;
+        HttpServletResponse httpResponse = (HttpServletResponse)response;
+        
+        String userId = "user_" + "";
+        Cookie user = new Cookie("JSESSIONID", userId);
+        user.setMaxAge(-1);
+        
+        httpResponse.addCookie(user);*/
+        
+        //这里把userID放到线程是否迟了,即shiro session是否已经创建?迟了,已经创建,必须在AuthenticatingFilter.executeLogin之前,可以本类重写executeLogin,但好像还拿不到userID//可以在重写doGetAuthenticationInfo放到线程
+        
+        
+        return super.onLoginSuccess(token, subject, request, response);
+    }
+    
+    //因为跳转去登录时没有保存原请求,所以登录成功后没办法到原请求.这里重写一下,从httpsession保存原请求
+    /*protected void issueSuccessRedirect(ServletRequest request, ServletResponse response) throws Exception {
+        
+        ShiroHttpServletRequest t = (ShiroHttpServletRequest)request;
+        HttpServletRequest httpRequest = (HttpServletRequest)t.getRequest();
+        HttpSession httpSession = httpRequest.getSession(false);
+        
+        
+        String fallbackUrl = (String)httpSession.getAttribute("el_fallbackUrl");
+//        WebUtils.redirectToSavedRequest(request, response, fallbackUrl);
+        WebUtils.issueRedirect(request, response, fallbackUrl, null, false);
+    }*/
+    
+}
+

@@ -1,0 +1,94 @@
+package com.huangzl.shiro;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Properties;
+
+import org.drools.KnowledgeBase;
+import org.drools.agent.KnowledgeAgent;
+import org.drools.agent.KnowledgeAgentConfiguration;
+import org.drools.agent.KnowledgeAgentFactory;
+import org.drools.io.ResourceChangeScannerConfiguration;
+import org.drools.io.ResourceFactory;
+import org.drools.runtime.StatefulKnowledgeSession;
+import org.drools.runtime.StatelessKnowledgeSession;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.stereotype.Component;
+/**  
+ * @类名：DroolsUtil
+ * @描述: 
+ * @创建人：<a href=mailto: chencong@eelly.net>chencong</a>
+ * @修改人：
+ * @修改时间：2014年11月6日 下午4:58:00
+ * @修改说明  <br/>
+ * @版本信息：V1.0.0<br/>
+ */
+public class DroolsUtil { 
+    
+      private KnowledgeAgent kagent;  
+      private String interval;
+      
+      private static class SingletonClassInstance { 
+        private static final DroolsUtil instance = new DroolsUtil(); 
+      } 
+
+      public static DroolsUtil getInstance() {
+        return SingletonClassInstance.instance; 
+      } 
+
+      private DroolsUtil() { 
+          Resource resource = new ClassPathResource("conf/common.properties");
+          try {
+            Properties prop = PropertiesLoaderUtils.loadProperties(resource);
+            interval=prop.getProperty("interval");
+          } catch (IOException e) {
+          } 
+         this.kagent = getKnowledgeAgent("agent",interval);
+      }
+  
+    
+   
+    public KnowledgeAgent getKnowledgeAgent(String agentName,String interval){  
+        ResourceChangeScannerConfiguration sconf = ResourceFactory.getResourceChangeScannerService().newResourceChangeScannerConfiguration();  
+        sconf.setProperty("drools.resource.scanner.interval",interval);  
+        ResourceFactory.getResourceChangeScannerService().configure(sconf);  
+        ResourceFactory.getResourceChangeScannerService().start();  
+        ResourceFactory.getResourceChangeNotifierService().start();  
+        KnowledgeAgentConfiguration aconf = KnowledgeAgentFactory.newKnowledgeAgentConfiguration();  
+        aconf.setProperty("drools.agent.scanDirectories","true");  
+        aconf.setProperty("drools.agent.newInstance","true");  
+        KnowledgeAgent kagent = KnowledgeAgentFactory.newKnowledgeAgent(agentName,aconf);  
+        kagent.applyChangeSet(ResourceFactory.newClassPathResource("resource.xml"));  
+        return kagent;  
+    }   
+  
+    /** 
+     * Get the KnowledgeBase 
+     * @return KnowledgeBase 
+     */  
+    public KnowledgeBase getKnowledgeBase(){  
+        return kagent.getKnowledgeBase();  
+    }  
+  
+    /** 
+     * Get the StatefulKnowledgeSession 
+     * @return StatefulKnowledgeSession 
+     */  
+    public StatefulKnowledgeSession getStatefulKnowledgeSession(){  
+        return getKnowledgeBase().newStatefulKnowledgeSession();  
+    }  
+  
+    /** 
+     * Get the StatelessKnowledgeSession 
+     * @return StatelessKnowledgeSession 
+     */  
+    public StatelessKnowledgeSession getStatelessKnowledgeSession(){  
+        return getKnowledgeBase().newStatelessKnowledgeSession();  
+    }  
+      
+}  

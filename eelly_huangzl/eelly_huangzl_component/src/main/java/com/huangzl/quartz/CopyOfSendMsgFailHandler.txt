@@ -1,0 +1,218 @@
+/** 
+* @组件名：eelly_core
+* @包名：com.eelly.core.rocketmq
+* @文件名：SendMsgFailHandler.java
+* @创建时间： 2015年1月8日 上午9:21:31
+* @版权信息：Copyright © 2014 eelly Co.Ltd,衣联网版权所有。
+*/
+
+package com.eelly.core.rocketmq;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import org.springframework.stereotype.Component;
+import org.springframework.util.StopWatch;
+
+import com.alibaba.rocketmq.common.message.Message;
+import com.eelly.core.exception.EellyException;
+import com.eelly.core.util.JsonUtil;
+
+/**
+ * @类名：SendMsgFailHandler
+ * @描述: 
+ * @创建人：<a href=mailto: huangzhenliang@eelly.net>huangzhenliang</a>
+ * @修改人：
+ * @修改时间：2015年1月8日 上午9:21:31
+ * @修改说明：<br/>
+ * @版本信息：V1.0.0<br/>
+ */
+@Component
+public class CopyOfSendMsgFailHandler {
+    
+    public static void main(String[] args) {//模拟tomcat应用启动
+        
+        CopyOfSendMsgFailHandler hander = new CopyOfSendMsgFailHandler();
+        
+        //模拟产生失败消息
+        Message msg = new Message("myTopic", "myTag", "myKey", "myBody".getBytes());
+        msg.putUserProperty(WEIGHT, "9");//自定义标识,设置消息重发权重
+        
+        String groupName = "group1";
+        
+        hander.handle(groupName, msg);
+        
+//        hander.reSengMsg();//System.err.println("**********************after this is UN Reach code***************************");
+        
+        
+    }
+    
+    private static final String WEIGHT = "weight";
+    
+    //TODO 测试
+    private List<FailMessage> testDB = new ArrayList<FailMessage>();
+    
+    //** spring初始化即可,一个线程池
+    private ExecutorService pool = Executors.newFixedThreadPool(20);
+    public void handle(final Message msg){
+        //** 起线程来处理;太多线程占用内存,使用线程池
+        pool.execute(new Runnable() {
+            
+            @Override
+            public void run() {
+                String weigh = msg.getUserProperty(WEIGHT);//自定义标识,设置消息重发权重
+                if(weigh != null){
+                    String msgJson = JsonUtil.toJson(msg);
+                    System.out.println(msgJson);
+                    
+                    //持久化到数据库或者缓存
+                    FailMessage fm = new FailMessage();
+                    fm.setMsgJson(msgJson);
+                    fm.setWeigh(weigh);
+                    testDB.add(fm);
+                }
+            }
+            
+        });
+    }
+    
+    
+    //定时job,需要保证单线程,保证上次job已经跑完,避免消息重复发送;可以使用分布式锁,可以保证一次只有一个实例在跑,但不能保证只有一个定时器
+    public void reSengMsg(){
+        System.err.println("start run reSengMsg");
+        //**加锁
+        RedisLock lock = new RedisLock(this.getClass()+"");
+        lock.lockNoTimeout(60 * 1);//锁过期时间,必须大于定时任务时间,因为在定时任务内更新锁过期时间使锁不过期.如果有定时任务在跑,锁就不会过期.没有定时任务在跑,锁就过期
+        
+        System.err.println("get lock and run reSengMsg");
+        
+        try {
+            runTask(lock);//一直持有锁////抛出异常休眠1分钟后解锁重试
+        } catch (Exception e) {
+            try {
+//                Thread.sleep(1000 * 60 * 1);//休眠1分钟
+            } catch (Exception e1) {
+                //e1.printStackTrace();
+            }
+            
+            //**解锁,重试
+            lock.unlock();
+            reSengMsg();
+        }
+        
+        //**UNreach code
+        System.err.println("**********************UN Reach code***************************");
+        
+        
+        //**解锁
+        lock.unlock();
+    }
+    
+    
+    
+    private void runTask(RedisLock lock){
+        
+        StopWatch cost = new StopWatch();//计时器
+        
+        long st = System.currentTimeMillis();
+        
+        while(true){//定时任务
+            //这里可以增加一个接口来判断是否退出程序
+            
+            cost.start();
+            
+            //从数据库读取发送失败消息
+            //重新发送到消息队列
+            //发送成功删除数据库,发送失败等待下次定时job
+            List<FailMessage> failList = testDB;
+            
+            for(FailMessage s : failList){
+                String msgJson = s.getMsgJson();
+                Message msg = JsonUtil.fromJson(msgJson, Message.class);
+                System.err.println(msg + "----" + msg.getUserProperty(WEIGHT));
+                
+                //发送到消息队列
+                
+                //删库
+                
+            }
+            lock.freshExpire();//更新锁过期时间
+            
+            cost.stop();
+            System.out.println("cost time:" + cost.getTotalTimeSeconds());
+            
+            //*****************//
+            //TODO 测试模拟程序跑一段时间后抛出异常
+            double last = (System.currentTimeMillis() - st) / 1000.0;
+            if(last>20){
+                System.err.println("totalCost:" + last);
+                throw new RuntimeException("test");
+            }
+            //*****************//
+            
+            try {
+                Thread.sleep(1000 * 1 * 5);//TODO 5分钟跑一次//********************************************************************//
+            } catch (InterruptedException e) {
+                //e.printStackTrace();
+            }
+        }
+    }
+
+}
+
+
+class FailMessage{
+    private int recId;
+    private String msgJson;
+    private String weigh;//权重
+    
+    
+    /**
+     * @return the weigh
+     */
+    public String getWeigh() {
+        return weigh;
+    }
+
+    
+    /**    
+     * @param weigh 要设置的 weigh    
+     */
+    public void setWeigh(String weigh) {
+        this.weigh = weigh;
+    }
+
+    /**
+     * @return the recId
+     */
+    public int getRecId() {
+        return recId;
+    }
+    
+    /**    
+     * @param recId 要设置的 recId    
+     */
+    public void setRecId(int recId) {
+        this.recId = recId;
+    }
+    
+    /**
+     * @return the msgJson
+     */
+    public String getMsgJson() {
+        return msgJson;
+    }
+    
+    /**    
+     * @param msgJson 要设置的 msgJson    
+     */
+    public void setMsgJson(String msgJson) {
+        this.msgJson = msgJson;
+    }
+    
+    
+}
+

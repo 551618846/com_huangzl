@@ -1,0 +1,4 @@
+参考spring对cache的封装(Cache,CacheManager).
+[org.springframework.cache.ehcache.EhCacheCache
+,org.springframework.cache.ehcache.EhCacheCacheManager]
+封装memcache和redis

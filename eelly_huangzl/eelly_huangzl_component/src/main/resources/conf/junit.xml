@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context" 
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd"
+		default-lazy-init="true">
+	
+	<!-- load properties file -->
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
+		<property name="ignoreResourceNotFound" value="true" />
+		<property name="locations">
+			<list>
+				<!-- 工程配置 -->
+				<value>classpath*:/conf/*.properties</value>
+				<!-- linux环境全局配置 -->
+				<value>file:/etc/eellyconf/global/*.properties</value>
+				<!-- windows环境全局配置 -->
+				<value>file:/c:/eellyconf/global/*.properties</value>
+				<!-- linux环境配置 -->
+				<value>file:/etc/eellyconf/store/*.properties</value>
+				<!-- windows环境配置 -->
+				<value>file:/c:/eellyconf/store/*.properties</value>
+			</list>
+		</property>
+	</bean>
+	
+	
+	
+	
+	<!-- 引入mybatis配置及数据源配置 -->
+	<import resource="classpath*:conf/mybatis-datasource.xml" />
+	<!-- 引入memcached缓存配置 -->
+<!-- 	<import resource="classpath*:conf/simple-spring-memcached.xml" /> -->
+	
+	
+	<context:annotation-config />
+	<context:component-scan base-package="com.eelly.huangzl" />
+	<aop:aspectj-autoproxy proxy-target-class="true" />
+	
+	
+	
+	<!-- 
+	<dubbo:application name="${component.name}" owner="${component.name}" />
+	<dubbo:registry id="defaultRegistry" protocol="zookeeper"
+		address="${dubbo.registry.address}" />
+	<dubbo:protocol name="dubbo" port="${dubbo.port}" threadpool="cached" threads="${dubbo.threadCount}" />
+	<dubbo:provider protocol="dubbo" loadbalance="roundrobin"
+		timeout="300000" retries="0" delay="-1" />
+	<dubbo:consumer check="false" />
+	 -->
+
+	<!-- RocketMQ的消息服务地址配置 -->
+	<!--
+	<bean id="configureInitializer" class="com.eelly.core.rocketmq.ConfigureInitializer"
+		init-method="init">
+		<property name="namesrvAddr" value="${rocketmq.namesrv.addr}" />
+	</bean>
+	 -->
+	
+	<!-- 
+	<dubbo:reference id="rocketMQFailHandlerDubboManager" interface="com.eelly.common.dubbo.manager.IRocketMQFailHandlerDubboManager" version="0.0.1" />
+	 -->
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+		
+</beans>

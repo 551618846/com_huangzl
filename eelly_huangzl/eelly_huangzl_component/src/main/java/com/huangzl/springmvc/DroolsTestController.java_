@@ -1,0 +1,222 @@
+/** 
+* @组件名：eelly_springmvc_component
+* @包名：com.eelly.mvc.drools
+* @文件名：DroolsTestController.java
+* @创建时间： 2014年10月30日 下午3:42:29
+* @版权信息：Copyright © 2014 eelly Co.Ltd,衣联网版权所有。
+*/
+
+package com.huangzl.springmvc;
+
+import java.util.Collection;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
+import org.kie.api.KieBase;
+import org.kie.api.runtime.KieSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.eelly.huangzl.member.service.IUserService;
+import com.huangzl.drools.HelloWorld.A;
+import com.huangzl.drools.HelloWorld.B;
+import com.huangzl.drools.HelloWorld.Message;
+import com.huangzl.drools.Drools6Util;
+
+/**
+ * @类名：DroolsTestController
+ * @描述: 
+ * @创建人：<a href=mailto: huangzhenliang@eelly.net>huangzhenliang</a>
+ * @修改人：
+ * @修改时间：2014年10月30日 下午3:42:29
+ * @修改说明：<br/>
+ * @版本信息：V1.0.0<br/>
+ */
+@Controller
+@RequestMapping("/drools")
+public class DroolsTestController {
+    
+    @Autowired(required=false)
+    @Qualifier("kb3")
+    private KieBase kbase3;
+    
+    @Autowired(required=false)
+    @Qualifier("kb2")
+    private KieBase kbase;
+    
+    @Autowired(required=false)
+    @Qualifier("kb1")
+    private KieBase kbase1;
+    
+    @Autowired
+    private IUserService userService;
+    
+    
+    @RequestMapping("/reload.html")
+    public ModelAndView reload(HttpServletRequest request, HttpServletResponse response) throws Exception{
+        Drools6Util.reloadDrools();
+        response.getWriter().print("ok");
+        response.getWriter().flush();
+        response.getWriter().close();
+        
+        return null;
+    }
+    
+    
+    @RequestMapping("/test4.html")
+    public ModelAndView test4(HttpServletRequest request, HttpServletResponse response) throws Exception{
+        
+        KieSession ksession = Drools6Util.getKieSession();
+        
+        final Message message = new Message();
+        message.setName("huangzl");
+        
+        ksession.insert( message );
+        
+        
+        // and fire the rules
+        ksession.fireAllRules();
+        
+        response.getWriter().print("ok");
+        response.getWriter().flush();
+        response.getWriter().close();
+        
+        return null;
+    }
+    
+    
+    
+    
+    
+    @RequestMapping("/test2.html")
+    public ModelAndView test2(HttpServletRequest request, HttpServletResponse response) throws Exception{
+        
+        //MyBatis传多个参数:bean或Map或注解@Param多个参数
+        //MyBatis返回类型:bean或map:resultMap/resultType
+        //条件查询:获取前段条件,组装成bean/Map,传到Dao接口方法:xxx(bean/map)
+        //对应的Mapper的sql:<select id="xxx" resultMap/resultType="bean/hashmap" parameterType="bean/Map"....
+        /*String userId = request.getParameter("uid");
+        
+        
+        KieSession ksession = kbase3.newKieSession();
+        ksession.addEventListener( new DebugAgendaEventListener() );
+        ksession.addEventListener( new DebugRuleRuntimeEventListener() );
+        
+        HttpSession session = request.getSession();
+        session.setAttribute("userName", "dd");
+        
+        ksession.setGlobal("session", session);
+        
+        // The application can insert facts into the session
+        User query = new User();
+        if(!StringUtils.isBlank(userId)){
+            int uid = Integer.parseInt(userId);
+            query.setRecId(uid);//一些业务的条件
+        }
+        
+        ksession.insert( query );//权限相关的条件
+        
+        Subject subject = SecurityUtils.getSubject();
+        boolean t = subject.hasRole("dd");
+        
+        UserPermission permit = new UserPermission();
+        List<String> roles = new ArrayList<String>();
+        roles.add("admin");
+        permit.setRoles(roles);
+        
+        ksession.insert( permit );
+        // and fire the rules
+        ksession.fireAllRules();
+        
+        
+        List<User> list = userService.findUser(query);
+        
+        System.out.println("====================");
+        
+        StringBuilder sb = new StringBuilder();
+        for(User u : list){
+            System.out.println(u.getUsername());
+            sb.append(u.getUsername()+"\n");
+        }
+        
+        response.getWriter().print(sb);
+        response.getWriter().flush();
+        response.getWriter().close();*/
+        
+        return null;
+    }
+    
+    @RequestMapping("/test.html")
+    public ModelAndView test(HttpServletRequest request, HttpServletResponse response) throws Exception{
+        
+        /*String[] all = SpringContextUtil.getApplicationContext().getBeanDefinitionNames();
+        for(String b : all){
+            System.out.println("bean:"+b);
+        }*/
+        
+        Collection<? extends KieSession> list = kbase.getKieSessions();//0?
+        for(KieSession ks : list){
+            System.out.println("KieSession:"+ks);
+        }
+        
+        KieSession ksession = kbase.newKieSession();
+
+        // The application can insert facts into the session
+        
+        
+
+        // and fire the rules
+        ksession.fireAllRules();
+        
+        ksession.dispose();
+        
+        response.getWriter().print("ok");
+        response.getWriter().flush();
+        response.getWriter().close();
+        
+        return null;
+    }
+    
+    
+    @RequestMapping("/test1.html")
+    public ModelAndView test1(HttpServletRequest request, HttpServletResponse response) throws Exception{
+        
+        KieSession ksession = kbase1.newKieSession();
+//        System.out.println("=======================");
+        
+        // The application can insert facts into the session
+        A a = new A();
+        a.setName("a");
+        
+        B b = new B();
+        b.setName("b");
+        
+        ksession.insert( a );
+        ksession.insert( b );
+        
+        
+        // and fire the rules
+        ksession.fireAllRules();
+        
+        ksession.dispose();
+        
+        response.getWriter().print("ok");
+        response.getWriter().flush();
+        response.getWriter().close();
+        
+        return null;
+    }
+    
+    
+
+}
+

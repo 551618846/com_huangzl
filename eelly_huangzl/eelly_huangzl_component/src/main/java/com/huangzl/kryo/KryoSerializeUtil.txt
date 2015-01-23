@@ -1,0 +1,127 @@
+/** 
+ * @组件名：eelly_springmvc_component
+ * @包名：com.eelly.core.cache.redis
+ * @文件名：KryoSerializeUtil.java
+ * @创建时间： 2014年12月23日 下午3:34:45
+ * @版权信息：Copyright © 2014 eelly Co.Ltd,衣联网版权所有。
+ */
+
+package com.huangzl.kryo;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
+import com.esotericsoftware.kryo.pool.KryoFactory;
+import com.esotericsoftware.kryo.pool.KryoPool;
+
+/**
+ * @类名：KryoSerializeUtil
+ * @描述:使用Kryo来序列化对象; <p>https://github.com/EsotericSoftware/kryo 
+ * <p>限制
+ * <p>1,正常情况下，需要被序列化的对象有默认的无参构造器。
+ * <p>2,不需要实现Serializable接口。
+ * <p>3,如果想使用不带无参构造器的对象也能正确反序列化，可以考虑kryo-serializers包，使用其提供的KryoReflectionFactorySupport，会采用jdk的ReflectionFactory反射的生成对象。该方式不需要提供默认的构造器也可以成功反序列化，但是由于不调用构造器，如果在构造器中维护了别的类的状态， 会导致别的类状态失效。所以最佳实践是，构造器最好只用于初始化本类的属性。注意：如果使用KryoReflectionFactorySupport而导致错误，有可能不抛异常，而是状态直接错误，很难调试，建议谨慎使用。
+ * <p>4,如果调用了List的sublist方法生成的SubList对象，或者使用Arrays.asList方法生成的对象，都不能正确的序列化。仍然可以使用kryo-serializers包所提供的SubListSerializers，ArraysAsListSerializer等完成正确序列化。
+ * <p>5,对于自定义的特殊类，可以自定义实现FieldSerialier的create方法，并注册到Kryo的实例化对象中去。
+ * <p>http://my.oschina.net/u/719192/blog/271990
+ * @创建人：<a href=mailto: huangzhenliang@eelly.net>huangzhenliang</a>
+ * @修改人：
+ * @修改时间：2014年12月23日 下午3:34:45
+ * @修改说明：<br/>
+ * @版本信息：V1.0.0<br/>
+ */
+public class KryoSerializeUtil {
+
+    // private final Kryo kryo = new Kryo();
+    private static KryoFactory factory = new KryoFactory() {
+
+        public Kryo create() {
+            Kryo kryo = new Kryo();
+            // configure kryo instance, customize settings
+//            kryo.register(ArrayList.class);
+            kryo.register(ArrayList.class);
+            kryo.register(HashMap.class);
+            kryo.register(Object.class);
+            kryo.register(String.class);
+            kryo.register(byte[].class);
+            kryo.register(byte.class);
+//            kryo.setRegistrationRequired(false);
+            return kryo;
+        }
+    };
+
+    // Build pool with SoftReferences enabled (optional)
+    private static KryoPool pool = new KryoPool.Builder(factory).softReferences().build();//使用线程安全的java.util.concurrent.ConcurrentLinkedQueue
+
+
+    /**
+     * @方法名：serialize
+     * @描述：序列化. 
+     * @创建人：<a href=mailto: huangzhenliang@eelly.net>huangzhenliang</a>
+     * @修改人：
+     * @修改时间：2014年12月23日 下午4:58:41
+     * @param object
+     * @return 
+     * @返回值：byte[]或null 
+     * @异常说明：
+     */
+    public static byte[] serialize(Object object) {
+        if (object == null) {
+            return null;
+        }
+
+        Output output = null;
+        Kryo kryo = null;
+        try {
+            kryo = pool.borrow();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            output = new Output(baos);
+            kryo.writeClassAndObject(output, object);
+            output.flush();
+            return baos.toByteArray();
+        } finally {
+            if(kryo != null){
+                pool.release(kryo);
+            }
+            if (output != null)
+                output.close();
+        }
+    }
+
+    /**
+     * @方法名：unserialize
+     * @描述：反序列化. 
+     * @创建人：<a href=mailto: huangzhenliang@eelly.net>huangzhenliang</a>
+     * @修改人：
+     * @修改时间：2014年12月23日 下午4:56:51
+     * @param bytes
+     * @return 
+     * @返回值：Object或null
+     * @异常说明：
+     */
+    public static Object unserialize(byte[] bytes) {
+        if (bytes == null || bytes.length == 0)
+            return null;
+        
+        Input ois = null;
+        Kryo kryo = null;
+        try {
+            kryo = pool.borrow();
+            ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+            ois = new Input(bais);
+            return kryo.readClassAndObject(ois);
+        } finally {
+            if(kryo != null){
+                pool.release(kryo);
+            }
+            if (ois != null)
+                ois.close();
+        }
+    }
+
+}

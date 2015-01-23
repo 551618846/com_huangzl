@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context" 
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd"
+		default-lazy-init="true">
+		
+	<!-- connection pool -->
+	<bean id="parentDataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+		<!-- 最大连接池数量 -->
+		<property name="maxActive" value="${dbpool.maxActive}" />
+		<!-- 初始化时建立物理连接的个数 -->		
+		<property name="initialSize" value="${dbpool.initialSize}" />
+		<!-- 最小连接池数量 -->
+		<property name="minIdle" value="${dbpool.minIdle}" />
+		<!-- 配置获取连接等待超时的时间 -->
+		<property name="maxWait" value="${dbpool.maxWait}" />
+		<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+		<property name="timeBetweenEvictionRunsMillis" value="${dbpool.timeBetweenEvictionRunsMillis}" />
+		<!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+		<property name="minEvictableIdleTimeMillis" value="${dbpool.minEvictableIdleTimeMillis}" />
+		
+		<!-- 检测连接是否有效的SQL -->
+		<property name="validationQuery" value="SELECT 'x'" />
+		<!-- 该配置为 true时不影响性能，并且保证安全性。
+		      申请连接的时候检测，如果空闲时间大于timeBetweenEvictionRunsMillis配置项定义的时间，执行validationQuery检测连接是否有效。 -->
+		<property name="testWhileIdle" value="true" />
+		<!-- 申请连接时执行validationQuery检测连接是否有效,该配置项为 true 时会降低性能 -->
+		<property name="testOnBorrow" value="false" />
+		<!-- 归还连接时执行validationQuery检测连接是否有效，该配置项为 true 时会降低性能 -->
+		<property name="testOnReturn" value="false" />
+		
+		<!-- 属性类型是字符串，通过别名的方式配置扩展插件，常用的插件有：
+              监控统计用的filter:stat 日志用的filter:log4j 防御sql注入的filter:wall -->
+		<property name="filters" value="stat" />
+		
+		<!-- 强制关闭长时间不使用的连接  -->
+		<property name="removeAbandoned" value="true" />
+		<!-- 超过30分钟开始关闭空闲连接 -->
+		<property name="removeAbandonedTimeout" value="1800" />
+		<!-- 将当前关闭动作记录到日志 -->
+		<property name="logAbandoned" value="true" />
+	</bean>
+	
+	<bean id="masterDataSource" parent="parentDataSource">
+		<property name="url" value="${master.jdbc.url}" />
+		<property name="username" value="${master.jdbc.username}" />
+		<property name="password" value="${master.jdbc.password}" />
+	</bean>
+	
+	<bean id="slaveDataSource" parent="parentDataSource">
+		<property name="url" value="${slave.jdbc.url}" />
+		<property name="username" value="${slave.jdbc.username}" />
+		<property name="password" value="${slave.jdbc.password}" />
+	</bean>
+	
+	<bean id="dynamicDataSource" class="com.eelly.core.util.datasource.DynamicDataSource">
+		<property name="targetDataSources">
+			<map key-type="java.lang.String">
+				<entry key="master" value-ref="masterDataSource" />
+				<entry key="slave" value-ref="slaveDataSource" />
+			</map>
+		</property>
+		<property name="defaultTargetDataSource" ref="masterDataSource" />
+	</bean>
+		
+	<!-- mybatis -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dynamicDataSource" />
+		<property name="configLocation" value="classpath:conf/mybatis-config.xml" />
+		<property name="mapperLocations" value="classpath*:com/huangzl/*/*/dao/mapper/**/*.xml" />
+	</bean>
+
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.huangzl.*.*.dao" />
+	</bean>
+	
+	<!-- transaction -->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dynamicDataSource" />
+	</bean>
+	<tx:annotation-driven transaction-manager="transactionManager" />
+	
+</beans>

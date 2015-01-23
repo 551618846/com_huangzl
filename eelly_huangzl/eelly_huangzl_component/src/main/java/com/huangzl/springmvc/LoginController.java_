@@ -1,0 +1,53 @@
+/** 
+* @组件名：eelly_huangzl_component
+* @包名：com.huangzl.springmvc
+* @文件名：LoginController.java
+* @创建时间： 2014年10月16日 下午2:53:22
+* @版权信息：Copyright © 2014 eelly Co.Ltd,衣联网版权所有。
+*/
+
+package com.huangzl.springmvc;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.RedirectView;
+
+/**
+ * @类名：LoginController
+ * @描述: 
+ * @创建人：<a href=mailto: huangzhenliang@eelly.net>huangzhenliang</a>
+ * @修改人：
+ * @修改时间：2014年10月16日 下午2:53:22
+ * @修改说明：<br/>
+ * @版本信息：V1.0.0<br/>
+ */
+@Controller
+public class LoginController {
+    
+    
+    
+    @RequestMapping("/login.do")
+    public ModelAndView login(String userName ,String password){
+        System.out.println("---1");
+        if(!"huangzl".equals(userName)){
+            return new ModelAndView("index");
+        }
+        
+        return new ModelAndView("redirect:/jsp/index.jsp");
+    }
+    
+    @RequestMapping("/login2.do")
+    public String login2(String userName ,String password){
+        System.out.println("---2");
+        if(!"huangzl".equals(userName)){
+//            return new ModelAndView(new RedirectView("/jsp/login.jsp"));
+            return "login";
+        }
+        
+        return "redirect:/jsp/index.jsp";
+    }
+    
+    
+}
+
