@@ -54,7 +54,7 @@ public class UserServiceImpl2Test  extends BaseTestCase{
      * 1,脏读:第1事务隔离级别设置为READ_UNCOMMITTED,第2事务随意:第1事务读取一次,休眠(这时第2事务修改后休眠),第1事务读取第二次(脏读)休眠,第2事务回滚,第1事务读取3次;test_READ_UNCOMMITTED+testWrite_READ_UNCOMMITTED
      * 2,不可重复读:1事务隔离级别设置为READ_COMMITTED,第2事务随意:第1事务读取一次,休眠(这时第2事务修改后提交),第1事务读取第二次(结果不同);test_READ_COMMITTED+test_WRITE_DEFAULT
      * 3,可重复读:1事务隔离级别设置为REPEATABLE_READ,第2事务随意,测试同上,第1事务读取第二次(结果相同);test_REPEATABLE_READ+test_WRITE_DEFAULT
-     * 3,(不会)幻读:1事务隔离级别设置为REPEATABLE_READ,第2事务随意:第1事务读取一次,休眠(这时第2事务insert后提交),第1事务读取第二次(记录数不同)phantomRead+testInsert_phantomRead
+     * 3,(不会?)幻读:1事务隔离级别设置为REPEATABLE_READ,第2事务随意:第1事务读取一次,休眠(这时第2事务insert后提交),第1事务读取第二次(记录数不同)phantomRead+testInsert_phantomRead
      * 4,acid:1事务隔离级别设置为SERIALIZABLE,第2事务随意:第1事务开始,休眠,第1事务修改后提交等待第1事务;test_SERIALIZABLE+testInsert_phantomRead
      */
     @Test
