@@ -15,13 +15,8 @@ import java.util.List;
 import org.springframework.util.StopWatch;
 
 /**
- * @类名：TestList
- * @描述: 
- * @创建人：<a href=mailto: huangzhenliang@eelly.net>huangzhenliang</a>
- * @修改人：
- * @修改时间：2015年1月27日 下午1:54:10
- * @修改说明：<br/>
- * @版本信息：V1.0.0<br/>
+ * ArrayList的实现是数组,定位元素比较快,中间插入删除比较慢
+ * LinkedList的实现是双向链表(Node[item,next,prev]),定位元素比较慢,中间插入删除比较慢
  */
 public class TestList {
     

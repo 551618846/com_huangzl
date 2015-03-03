@@ -11,26 +11,11 @@ package com.huangzl.collection;
 import java.util.HashMap;
 
 /**
- * @类名：TestMap
- * @描述: 
- * @创建人：<a href=mailto: huangzhenliang@eelly.net>huangzhenliang</a>
- * @修改人：
- * @修改时间：2015年1月27日 上午11:27:32
- * @修改说明：<br/>
- * @版本信息：V1.0.0<br/>
+ * hashMap的实现是数组+entity对象,通过hash值将key索引到数组下标:index= hash(key) & length-1,数组length必须为2的n次方
  */
 public class TestHashMap {
 
-    /**
-     * @方法名：main
-     * @描述：TODO 
-     * @创建人：<a href=mailto: huangzhenliang@eelly.net>huangzhenliang</a>
-     * @修改人：
-     * @修改时间：2015年1月27日 上午11:27:33
-     * @param args 
-     * @返回值：void 
-     * @异常说明：
-     */
+    
     public static void main(String[] args) {
         HashMap<String, String> map = new HashMap<String, String>();
         map.put("key1", "value1");//主要难点是对key的hash值进行索引,存储到数组对应的索引位置:求索引的方法是:按位与 index= hash & length-1,结果是小于length的一个值
