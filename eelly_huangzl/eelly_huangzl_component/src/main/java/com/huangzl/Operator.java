@@ -8,6 +8,8 @@
 
 package com.huangzl;
 
+import java.util.HashMap;
+
 /**
  * @类名：Operator
  * @描述: 
@@ -26,15 +28,28 @@ public class Operator {
      * @修改人：
      * @修改时间：2015年3月3日 下午2:03:51
      * @param args 
+     * @throws Exception 
      * @返回值：void 
      * @异常说明：
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 //        bitLeftMove();
 //        bitAnd();
         hashIndex();
+        oom();
+        Thread.sleep(1000 * 1000);
         
     }
+    
+    public static void oom(){
+        String value = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+        HashMap<String, String> m = new HashMap<String, String>();
+        for(int i=0;i<1000000;i++){
+            m.put(i+"", value);
+        }
+        System.err.println("ok");
+    }
+    
     
     public static void bitLeftMove(){//左移,常用为1 << n相当于2的n次方
         int move = 3;
