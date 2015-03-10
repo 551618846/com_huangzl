@@ -26,8 +26,8 @@ public class Test {
     /**
      * 测试方法
      * 1,安装memory analysis
-     * 2,运行配置加vm参数:-Xms6M -Xmx12M -XX:PermSize=6m -XX:MaxPermSize=12m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=D:\
-     * 3,运行,生成dump
+     * 2,运行配置加vm参数使用小内存:-Xms6M -Xmx12M -XX:PermSize=6m -XX:MaxPermSize=12m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=D:\
+     * 3,运行,爆内存,生成了dump
      * 4,打开perspective:memory analysis:file>open heap dump生成分析
      * 5,打开dominator tree,按retained heap(占用内存,gc该对象时会回收的内存)排序,查看哪些对象大量占用内存,或者存在大量对象;右键对象>List objects > with outgoning references查看本对象引用哪些对象
      * 6,右键该对象>Path To GC Roots,查看被哪里引用,分析代码是否未释放内存
