@@ -36,6 +36,32 @@ public class StringTest {
         
         System.err.println(a == b);//false
         System.err.println(b == c);//true
+        
+        test();
+    }
+    
+    /**
+     * 输入字符串,反向输出数字,"123">321
+     */
+    public static void test(){
+        String s = "123765";
+        char[] a = s.toCharArray();
+        for(int i=0;i<a.length/2;i++){
+            char t = a[i];
+            a[i] = a[a.length-1-i];
+            a[a.length-1-i] = t;
+        }
+        String rt = new String(a);
+        System.err.println(rt);
+        //char-48=int//比如'1'-48=1
+        //char-'0'=int//'1'-'0'=1
+        
+        char t = '1';
+        System.err.println(t-48);
+        System.err.println(t-'0');
+        
+//        StringBuffer.class;//thread-safe
+//        StringBuilder.class//no thread-safe
     }
 
 }
