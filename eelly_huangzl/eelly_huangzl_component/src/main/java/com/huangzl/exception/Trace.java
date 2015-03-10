@@ -20,14 +20,7 @@ package com.huangzl.exception;
 public class Trace {
 
     /**
-     * @方法名：main
-     * @描述：TODO 
-     * @创建人：<a href=mailto: huangzhenliang@eelly.net>huangzhenliang</a>
-     * @修改人：
-     * @修改时间：2014年9月24日 下午5:14:56
-     * @param args 
-     * @返回值：void 
-     * @异常说明：
+     * 
      */
     public static void main(String[] args) {
         Test.source();
