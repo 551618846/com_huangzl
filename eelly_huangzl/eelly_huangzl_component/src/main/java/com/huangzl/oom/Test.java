@@ -15,6 +15,8 @@ import java.util.List;
  * vm参数加上,生成dump
  * -Xms6M -Xmx12M -XX:PermSize=6m -XX:MaxPermSize=12m
 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=D:\
+
+-XX:+PrintGC：PrintGCTimeStamps打印gc
  */
 public class Test {
 
