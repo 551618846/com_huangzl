@@ -34,27 +34,33 @@ public class Operator {
      */
     public static void main(String[] args) throws Exception {
 //        bitLeftMove();
-//        bitAnd();
-        hashIndex();
-        oom();
-        Thread.sleep(1000 * 1000);
+//        bitRightMove();
         
+//        bitAnd();
+        bitOr();
+//        hashIndex();
+//        Thread.sleep(1000 * 1000);
+        //65535//2进制1111111111111111(16bit)
+        System.err.println(Integer.toBinaryString(65535));
     }
     
-    public static void oom(){
-        String value = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
-        HashMap<String, String> m = new HashMap<String, String>();
-        for(int i=0;i<1000000;i++){
-            m.put(i+"", value);
-        }
-        System.err.println("ok");
-    }
     
+    //左移<<,右移>>,左移作用:移1位相当于乘以2;右移可以用来截取前n位(&可以截取后n位)
+    
+    public static void bitRightMove(){//右移,用来截取前n位
+        int move = 3;
+        int i = 19;
+        int rt = i >> move;//
+        System.err.println(Integer.toBinaryString(i) + "," + Integer.toBinaryString(rt));
+    }
     
     public static void bitLeftMove(){//左移,常用为1 << n相当于2的n次方
         int move = 3;
         int rt = 1 << move;//对1左移n位,相当于取2的n次方
         System.err.println(rt);
+        
+        int doubl = 9<<1;
+        System.err.println(9 +"," + doubl);
     }
     
     public static void toBinaryString(){//二进制格式
@@ -62,14 +68,27 @@ public class Operator {
         System.err.println(Integer.toBinaryString(a));
     }
     
-    public static void bitAnd(){
-        int a = 8;
+    
+    //按位与&, 按位或|
+    
+    public static void bitAnd(){//按位与,用来截取后n位,或某一位
+        int a = 29;
         int b = 56;
         int rt = a & b;
         
-        System.err.println(Integer.toBinaryString(a));
-        System.err.println(Integer.toBinaryString(b));
-        System.err.println(Integer.toBinaryString(rt));
+        System.err.println("与:"+Integer.toBinaryString(a)+","+Integer.toBinaryString(b)+","+Integer.toBinaryString(rt));
+        
+        int last = (1<<4) -1;
+        int lastn = a & last;
+        System.err.println("截取:"+Integer.toBinaryString(a)+","+Integer.toBinaryString(last) + "," +Integer.toBinaryString(lastn));
+    }
+    
+    public static void bitOr(){
+        int a = 29;
+        int b = 56;
+        int rt = a | b;
+        
+        System.err.println("或:"+Integer.toBinaryString(a)+","+Integer.toBinaryString(b)+","+Integer.toBinaryString(rt));
     }
     
     public static void hashIndex(){//模拟hashMap的使用hash值对object进行索引(数组下标),
