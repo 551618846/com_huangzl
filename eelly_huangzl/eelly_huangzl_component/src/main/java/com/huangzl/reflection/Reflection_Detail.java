@@ -33,7 +33,7 @@ public class Reflection_Detail {
         Method bar = z.getMethod("bar",String.class);
         for(int i=0;i<17;i++){
             Object rt = bar.invoke(z,"huang"+i);
-//            System.out.println(rt);
+            System.out.println(rt);
         }
     }
     
