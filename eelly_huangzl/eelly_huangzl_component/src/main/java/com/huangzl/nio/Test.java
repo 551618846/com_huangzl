@@ -24,7 +24,8 @@ public class Test {
      */
     public static void main(String[] args) throws Exception {
 //        path();
-        file();
+//        fileRead();
+        fileWrite();
     }
     
     public static String path(){
@@ -32,7 +33,7 @@ public class Test {
         return Test.class.getResource ("").getFile ();//"/E:/git_rep/eelly_huangzl/eelly_huangzl/eelly_huangzl_component/target/classes/com/huangzl/nio/"
     }
     
-    public static void file() throws Exception{
+    public static void fileRead() throws Exception{
         RandomAccessFile aFile = new RandomAccessFile(path() + "data.txt", "rw");
         FileChannel inChannel = aFile.getChannel();
 
@@ -52,6 +53,22 @@ public class Test {
             bytesRead = inChannel.read(buf);
         }
         aFile.close();
+    }
+    
+    public static void fileWrite() throws Exception{
+        RandomAccessFile aFile = new RandomAccessFile(path() + "data1.txt", "rw");
+        FileChannel outChannel = aFile.getChannel();
+        
+        ByteBuffer buf = ByteBuffer.allocate(48);
+        buf.clear();
+        
+        buf.put("1234xxx".getBytes());
+        outChannel.write(buf);
+        
+        System.err.println(aFile.getFilePointer());;
+        
+        aFile.close();
+        
     }
 
 }
