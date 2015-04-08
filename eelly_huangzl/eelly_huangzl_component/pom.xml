@@ -42,11 +42,12 @@
 	        <version>2.7.3</version>
 	    </dependency>
 	
-	
+		<!-- 
 		<dependency>
 			<groupId>com.eelly.core</groupId>
 			<artifactId>eelly_core</artifactId>
 		</dependency>
+		 -->
 		<dependency>
 			<groupId>com.eelly.huangzl</groupId>
 			<artifactId>eelly_huangzl_api</artifactId>
