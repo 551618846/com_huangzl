@@ -11,8 +11,6 @@ package com.huangzl.annotation;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
-import com.eelly.core.util.ReflectionUtil;
-import com.eelly.core.util.annotation.EellyAnnotation4Method;
 
 /**
  * @类名：Test

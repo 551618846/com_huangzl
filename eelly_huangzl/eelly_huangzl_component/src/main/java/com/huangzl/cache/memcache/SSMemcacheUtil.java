@@ -12,7 +12,6 @@ import java.util.Collection;
 
 import org.springframework.context.ApplicationContext;
 
-import com.eelly.core.util.SpringContextUtil;
 import com.google.code.ssm.Cache;
 
 /**
